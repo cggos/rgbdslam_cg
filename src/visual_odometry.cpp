@@ -51,8 +51,9 @@ int main(int argc, char** argv) {
         camera.scale = tum_data_rgbd.depth_scale_;
     }
 
-    int idx_last;
-    FRAME lastFrame;
+    int idx_c, idx_p;
+    FRAME frame_c, frame_p;
+
     PointCloud::Ptr cloud;
     pcl::visualization::CloudViewer viewer("viewer");
 
@@ -78,29 +79,34 @@ int main(int argc, char** argv) {
 
         if (i < idx_s) continue;
 
-        if (i == idx_s) {
+        idx_c = i;
+
+        if (idx_c == idx_s) {
             cout << "Initializing ..." << endl;
-            lastFrame = FRAME(img_color, img_depth);
-            compute_keypoints_desp(lastFrame);
-            cloud = image_to_pointcloud(lastFrame.rgb, lastFrame.depth, camera);
+            
+            frame_c = FRAME(img_color, img_depth);
+            compute_keypoints_desp(frame_c);
+
+            cloud = image_to_pointcloud(frame_c.rgb, frame_c.depth, camera);
 
             // 向globalOptimizer增加第一个顶点
             g2o::VertexSE3* v = new g2o::VertexSE3();
-            v->setId(idx_s);
+            v->setId(idx_c);
             v->setEstimate(Eigen::Isometry3d::Identity());  //估计为单位矩阵
             v->setFixed(true);                              //第一个顶点固定，不用优化
             globalOptimizer.addVertex(v);
 
-            idx_last = idx_s;
+            idx_p = idx_c;
+            frame_p = frame_c;
 
             continue;
         }
 
-        cout << "current index: " << i << endl;
-        FRAME currFrame = FRAME(img_color, img_depth);
-        compute_keypoints_desp(currFrame);
+        cout << "current index: " << idx_c << endl;
+        frame_c = FRAME(img_color, img_depth);
+        compute_keypoints_desp(frame_c);
 
-        RESULT_OF_PNP result = estimate_motion(lastFrame, currFrame, camera);
+        RESULT_OF_PNP result = estimate_motion(frame_p, frame_c, camera);
 
         std::cout << "inliers: " << result.inliers << std::endl;
         if (result.inliers < min_inliers) continue;
@@ -113,20 +119,20 @@ int main(int argc, char** argv) {
         Eigen::Isometry3d T = cvmat_to_eigen(result.rvec, result.tvec);
 
         if (visualize == true) {
-            cloud = join_pointcloud(cloud, currFrame, T, camera);
+            cloud = join_pointcloud(cloud, frame_c, T, camera);
             viewer.showCloud(cloud);
         }
 
         // 向g2o中增加这个顶点与上一帧联系的边
         // 顶点只需设定id即可
         g2o::VertexSE3* v = new g2o::VertexSE3();
-        v->setId(i);
+        v->setId(idx_c);
         v->setEstimate(Eigen::Isometry3d::Identity());
         globalOptimizer.addVertex(v);
 
         g2o::EdgeSE3* edge = new g2o::EdgeSE3();
-        edge->vertices()[0] = globalOptimizer.vertex(idx_last);
-        edge->vertices()[1] = globalOptimizer.vertex(i);
+        edge->vertices()[0] = globalOptimizer.vertex(idx_p);
+        edge->vertices()[1] = globalOptimizer.vertex(idx_c);
         Eigen::Matrix<double, 6, 6> information = Eigen::Matrix<double, 6, 6>::Identity();
         // 信息矩阵是协方差矩阵的逆，表示我们对边的精度的预先估计
         // 因为pose为6D的，信息矩阵是6*6的阵，假设位置和角度的估计精度均为0.1且互相独立
@@ -138,8 +144,8 @@ int main(int argc, char** argv) {
         edge->setMeasurement(T);  // 边的估计即是pnp求解之结果
         globalOptimizer.addEdge(edge);
 
-        idx_last = i;
-        lastFrame = currFrame;
+        idx_p = idx_c;
+        frame_p = frame_c;
 
         usleep(30000);
     }
