@@ -31,8 +31,9 @@ struct FRAME {
     cv::Mat rgb, depth;       //该帧对应的彩色图与深度图
     cv::Mat desp;             //特征描述子
     vector<cv::KeyPoint> kp;  //关键点
+    long frameID;
     FRAME() {}
-    FRAME(cv::Mat rgb, cv::Mat depth) : rgb(rgb), depth(depth) {}
+    FRAME(cv::Mat rgb, cv::Mat depth, long frameID = 0) : frameID(frameID), rgb(rgb), depth(depth) {}
 };
 
 struct RESULT_OF_PNP {

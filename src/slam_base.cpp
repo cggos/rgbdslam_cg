@@ -122,6 +122,13 @@ RESULT_OF_PNP estimate_motion(FRAME& frame1, FRAME& frame2, CAMERA_INTRINSIC_PAR
         pts_obj.push_back(pt3);
     }
 
+    RESULT_OF_PNP result;
+
+    if(pts_obj.size() < 4) {
+        result.inliers = 0;
+        return result;
+    }
+
     cout << "solving pnp" << endl;
     double camera_matrix_data[3][3] = {
         {camera.fx, 0, camera.cx},
@@ -131,7 +138,6 @@ RESULT_OF_PNP estimate_motion(FRAME& frame1, FRAME& frame2, CAMERA_INTRINSIC_PAR
     cv::Mat rvec, tvec, inliers;
     cv::solvePnPRansac(pts_obj, pts_img, cameraMatrix, cv::Mat(), rvec, tvec, false, 100, 8.0, 0.99, inliers);
 
-    RESULT_OF_PNP result;
     result.rvec = rvec;
     result.tvec = tvec;
     result.inliers = inliers.rows;
