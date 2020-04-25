@@ -1,0 +1,20 @@
+# camera
+camera.cx=325.1;
+camera.cy=249.7;
+camera.fx=520.9;
+camera.fy=521.0;
+camera.scale=5000.0;
+
+# 起始与终止索引
+start_index=1
+end_index=800
+# 点云分辨率
+voxel_grid=0.01
+# 是否实时可视化
+visualize_pointcloud=yes
+# 最小匹配数量
+min_good_match=10
+# 最小内点
+min_inliers=5
+# 最大运动误差
+max_norm=0.3
