@@ -79,5 +79,5 @@ target_link_libraries(join_pointcloud slam_base)
 add_executable(visual_odometry app/visual_odometry.cpp)
 target_link_libraries(visual_odometry slam_base ${G2O_LIBRARIES})
 
-add_executable(slam app/slam.cpp)
-target_link_libraries(slam slam_base ${G2O_LIBRARIES})
+add_executable(rgbdslam app/slam.cpp)
+target_link_libraries(rgbdslam slam_base ${G2O_LIBRARIES})

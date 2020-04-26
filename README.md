@@ -4,6 +4,13 @@
 
 -----
 
+# Dependencies
+
+* Eigen3
+* OpenCV3
+* PCL 1.7
+* G2O (the lastest version)
+
 # Build
 
 ```sh
@@ -25,9 +32,17 @@ cd build
 
 ../bin/visual_odometry
 
-../slam
+../bin/rgbdslam
 ```
 
-<div align="center">
-  <img src="images/run_rgbdslam.jpg"/>
-</div>
+# Result
+
+* result of `bin/visual_odometry`
+  <div align="center">
+    <img src="images/run_rgbdslam.jpg"/>
+  </div>
+
+* `g2o_viewer result_after.g2o`, the result of `bin/rgbdslam`
+  <div align="center">
+    <img src="images/g2oviewer_rgbdslam.jpg"/>
+  </div>
