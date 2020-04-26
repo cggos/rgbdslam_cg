@@ -17,8 +17,6 @@ make -j2
 ```sh
 cd build
 
-../bin/rgbdslam
-
 ../bin/generate_pointcloud
 
 ../bin/detect_features
@@ -26,6 +24,8 @@ cd build
 ../bin/join_pointcloud
 
 ../bin/visual_odometry
+
+../slam
 ```
 
 <div align="center">
